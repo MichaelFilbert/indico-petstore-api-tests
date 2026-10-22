@@ -28,7 +28,7 @@ The Playwright tests also run on every push with GitHub Actions (`.github/workfl
 
 | Endpoint | Positive | Negative / boundary | Known bugs (marked `test.fail`) |
 |---|---|---|---|
-| POST /pet | Create with all fields, read back, required fields only | Malformed JSON | BUG-01 missing required fields, BUG-02 status outside enum, BUG-03 wrong id type → 500 |
+| POST /pet | Create with all fields, read back, required fields only | Malformed JSON | BUG-01 missing required fields, BUG-02 status outside enum, BUG-03 wrong data types (id, tags) → 500 |
 | GET /pet/findByStatus | available / pending / sold each return only that status, new pet appears, response matches the Pet model | | BUG-04 invalid status, BUG-05 missing status, BUG-06 repeated `status` params |
 | DELETE /pet/{petId} | Delete existing pet, then it's gone; with `api_key` header | Delete twice; ids 8999999999, 0, -1 | BUG-07 non-numeric id and id beyond int64 leak a Java exception |
 

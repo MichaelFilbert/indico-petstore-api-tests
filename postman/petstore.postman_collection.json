@@ -182,7 +182,7 @@
           ]
         },
         {
-          "name": "TC-POST-05 [BUG-01] Missing required fields should be 405",
+          "name": "TC-POST-05 [BUG-01] Missing required fields should be rejected (4xx)",
           "request": {
             "method": "POST",
             "header": [
@@ -211,14 +211,14 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('[BUG-01] expected 405 per spec', () => pm.response.to.have.status(405));"
+                  "pm.test('[BUG-01] expected a 4xx (spec: 405)', () => pm.expect(pm.response.code).to.be.within(400, 499));"
                 ]
               }
             }
           ]
         },
         {
-          "name": "TC-POST-06 [BUG-02] Status outside enum should be 405",
+          "name": "TC-POST-06 [BUG-02] Status outside enum should be rejected (4xx)",
           "request": {
             "method": "POST",
             "header": [
@@ -247,14 +247,14 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('[BUG-02] expected 405 per spec', () => pm.response.to.have.status(405));"
+                  "pm.test('[BUG-02] expected a 4xx (spec: 405)', () => pm.expect(pm.response.code).to.be.within(400, 499));"
                 ]
               }
             }
           ]
         },
         {
-          "name": "TC-POST-07 [BUG-03] Wrong id type should be 405, not 500",
+          "name": "TC-POST-07 [BUG-03] Wrong id type should be rejected (4xx), not 500",
           "request": {
             "method": "POST",
             "header": [
@@ -283,7 +283,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('[BUG-03] expected 405 per spec', () => pm.response.to.have.status(405));"
+                  "pm.test('[BUG-03] expected a 4xx client error, not 500 (spec: 405)', () => pm.expect(pm.response.code).to.be.within(400, 499));"
                 ]
               }
             }

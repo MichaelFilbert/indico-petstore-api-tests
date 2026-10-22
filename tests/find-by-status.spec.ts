@@ -46,7 +46,7 @@ test.describe('GET /pet/findByStatus - Find pets by status', () => {
     expect(res.status()).toBe(400);
   });
 
-  test('TC-GET-06 [BUG-06] repeated status params (collectionFormat: multi) should return both statuses', async ({ request }) => {
+  test('TC-GET-06 [BUG-06] repeated status params (collectionFormat: multi) should use every value, not only the first', async ({ request }) => {
     test.fail(true, 'BUG-06: only the first status value is used');
     const res = await request.get('pet/findByStatus?status=sold&status=pending');
     const statuses = new Set((await res.json()).map((p: { status: string }) => p.status));
