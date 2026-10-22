@@ -1,0 +1,148 @@
+newman
+
+INDICO - Petstore manual API tests
+
+❏ POST /pet
+↳ TC-POST-01 Create pet with all fields
+  POST https://petstore.swagger.io/v2/pet [200 OK, 511B, 1126ms]
+  ✓  status is 200
+  ✓  body echoes id, name and status
+
+↳ TC-POST-02 Created pet can be read back
+  GET https://petstore.swagger.io/v2/pet/9486862 [200 OK, 511B, 270ms]
+  ✓  status is 200
+  ✓  same name
+
+↳ TC-POST-03 Only required fields
+  POST https://petstore.swagger.io/v2/pet [200 OK, 398B, 267ms]
+  ✓  status is 200
+  ✓  server generates a numeric id
+
+↳ TC-POST-04 Malformed JSON is rejected
+  POST https://petstore.swagger.io/v2/pet [400 Bad Request, 386B, 269ms]
+  ✓  client error 4xx
+
+↳ TC-POST-05 [BUG-01] Missing required fields should be 405
+  POST https://petstore.swagger.io/v2/pet [200 OK, 398B, 273ms]
+  1. [BUG-01] expected 405 per spec
+
+↳ TC-POST-06 [BUG-02] Status outside enum should be 405
+  POST https://petstore.swagger.io/v2/pet [200 OK, 406B, 270ms]
+  2. [BUG-02] expected 405 per spec
+
+↳ TC-POST-07 [BUG-03] Wrong id type should be 405, not 500
+  POST https://petstore.swagger.io/v2/pet [500 Server Error, 400B, 268ms]
+  3. [BUG-03] expected 405 per spec
+
+❏ GET /pet/findByStatus
+↳ TC-GET-01 status=available
+  GET https://petstore.swagger.io/v2/pet/findByStatus?status=available [200 OK, 6.31kB, 271ms]
+  ✓  status is 200
+  ✓  every pet has status available
+
+↳ TC-GET-01 status=pending
+  GET https://petstore.swagger.io/v2/pet/findByStatus?status=pending [200 OK, 1.23kB, 270ms]
+  ✓  status is 200
+  ✓  every pet has status pending
+
+↳ TC-GET-01 status=sold
+  GET https://petstore.swagger.io/v2/pet/findByStatus?status=sold [200 OK, 4.75kB, 273ms]
+  ✓  status is 200
+  ✓  every pet has status sold
+
+↳ TC-GET-03 Items follow the Pet schema
+  GET https://petstore.swagger.io/v2/pet/findByStatus?status=pending [200 OK, 1.23kB, 271ms]
+  ✓  each item has numeric id and photoUrls array
+
+↳ TC-GET-04 [BUG-04] Invalid status should be 400
+  GET https://petstore.swagger.io/v2/pet/findByStatus?status=invalidstatus [200 OK, 328B, 272ms]
+  4. [BUG-04] expected 400 per spec
+
+↳ TC-GET-05 [BUG-05] Missing status should be 400
+  GET https://petstore.swagger.io/v2/pet/findByStatus [200 OK, 328B, 268ms]
+  5. [BUG-05] expected 400 per spec
+
+↳ TC-GET-06 [BUG-06] Repeated status params should return both
+  GET https://petstore.swagger.io/v2/pet/findByStatus?status=sold&status=pending [200 OK, 4.75kB, 275ms]
+  6. [BUG-06] both sold and pending returned
+
+❏ DELETE /pet/{petId}
+↳ TC-DEL-01 Delete the pet created in TC-POST-01
+  DELETE https://petstore.swagger.io/v2/pet/9486862 [200 OK, 375B, 268ms]
+  ✓  status is 200
+  ✓  message is the pet id
+
+↳ TC-DEL-02 Delete the same pet again
+  DELETE https://petstore.swagger.io/v2/pet/9486862 [404 Not Found, 292B, 270ms]
+  ✓  status is 404
+
+↳ TC-DEL-03 Delete an id that never existed
+  DELETE https://petstore.swagger.io/v2/pet/8999999999 [404 Not Found, 292B, 269ms]
+  ✓  status is 404
+
+↳ TC-DEL-05 [BUG-07] Non-numeric id should be 400
+  DELETE https://petstore.swagger.io/v2/pet/abc [404 Not Found, 433B, 272ms]
+  7. [BUG-07] expected 400 per spec
+  8. [BUG-07] no Java exception in the message
+
+┌─────────────────────────┬─────────────────────┬─────────────────────┐
+│                         │            executed │              failed │
+├─────────────────────────┼─────────────────────┼─────────────────────┤
+│              iterations │                   1 │                   0 │
+├─────────────────────────┼─────────────────────┼─────────────────────┤
+│                requests │                  18 │                   0 │
+├─────────────────────────┼─────────────────────┼─────────────────────┤
+│            test-scripts │                  18 │                   0 │
+├─────────────────────────┼─────────────────────┼─────────────────────┤
+│      prerequest-scripts │                   2 │                   0 │
+├─────────────────────────┼─────────────────────┼─────────────────────┤
+│              assertions │                  26 │                   8 │
+├─────────────────────────┴─────────────────────┴─────────────────────┤
+│ total run duration: 21.9s                                           │
+├─────────────────────────────────────────────────────────────────────┤
+│ total data received: 17.5kB (approx)                                │
+├─────────────────────────────────────────────────────────────────────┤
+│ average response time: 317ms [min: 267ms, max: 1126ms, s.d.: 196ms] │
+└─────────────────────────────────────────────────────────────────────┘
+
+[31m  # [39m[31m failure        [39m[31m detail                                                                                        [39m
+[90m    [39m[90m                [39m[90m                                                                                               [39m
+ 1.  AssertionError  [BUG-01] expected 405 per spec                                                                
+                     expected response to have status code 405 but got 200                                         
+                     at assertion:0 in test-script                                                                 
+                     inside "POST /pet / TC-POST-05 [BUG-01] Missing required fields should be 405"                
+[90m    [39m[90m                [39m[90m                                                                                               [39m
+ 2.  AssertionError  [BUG-02] expected 405 per spec                                                                
+                     expected response to have status code 405 but got 200                                         
+                     at assertion:0 in test-script                                                                 
+                     inside "POST /pet / TC-POST-06 [BUG-02] Status outside enum should be 405"                    
+[90m    [39m[90m                [39m[90m                                                                                               [39m
+ 3.  AssertionError  [BUG-03] expected 405 per spec                                                                
+                     expected response to have status code 405 but got 500                                         
+                     at assertion:0 in test-script                                                                 
+                     inside "POST /pet / TC-POST-07 [BUG-03] Wrong id type should be 405, not 500"                 
+[90m    [39m[90m                [39m[90m                                                                                               [39m
+ 4.  AssertionError  [BUG-04] expected 400 per spec                                                                
+                     expected response to have status code 400 but got 200                                         
+                     at assertion:0 in test-script                                                                 
+                     inside "GET /pet/findByStatus / TC-GET-04 [BUG-04] Invalid status should be 400"              
+[90m    [39m[90m                [39m[90m                                                                                               [39m
+ 5.  AssertionError  [BUG-05] expected 400 per spec                                                                
+                     expected response to have status code 400 but got 200                                         
+                     at assertion:0 in test-script                                                                 
+                     inside "GET /pet/findByStatus / TC-GET-05 [BUG-05] Missing status should be 400"              
+[90m    [39m[90m                [39m[90m                                                                                               [39m
+ 6.  AssertionError  [BUG-06] both sold and pending returned                                                       
+                     expected false to be true                                                                     
+                     at assertion:0 in test-script                                                                 
+                     inside "GET /pet/findByStatus / TC-GET-06 [BUG-06] Repeated status params should return both" 
+[90m    [39m[90m                [39m[90m                                                                                               [39m
+ 7.  AssertionError  [BUG-07] expected 400 per spec                                                                
+                     expected response to have status code 400 but got 404                                         
+                     at assertion:0 in test-script                                                                 
+                     inside "DELETE /pet/{petId} / TC-DEL-05 [BUG-07] Non-numeric id should be 400"                
+[90m    [39m[90m                [39m[90m                                                                                               [39m
+ 8.  AssertionError  [BUG-07] no Java exception in the message                                                     
+                     expected '{"code":404,"type":"unknown","message…' to not include 'Exception'                  
+                     at assertion:1 in test-script                                                                 
+                     inside "DELETE /pet/{petId} / TC-DEL-05 [BUG-07] Non-numeric id should be 400"                

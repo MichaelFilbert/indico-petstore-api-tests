@@ -1,0 +1,28 @@
+
+Running 23 tests using 3 workers
+
+  ✓   3 tests/find-by-status.spec.ts:6:9 › GET /pet/findByStatus - Find pets by status › TC-GET-01 status=available returns 200 and only pets with that status (1.3s)
+  ✓   2 tests/post-pet.spec.ts:10:7 › POST /pet - Add a new pet › TC-POST-01 create a pet with all fields returns 200 and echoes the body (1.5s)
+  ✓   1 tests/delete-pet.spec.ts:5:7 › DELETE /pet/{petId} - Delete a pet › TC-DEL-01 delete an existing pet returns 200 and the pet is gone (2.0s)
+  ✓   4 tests/find-by-status.spec.ts:6:9 › GET /pet/findByStatus - Find pets by status › TC-GET-01 status=pending returns 200 and only pets with that status (1.1s)
+  ✓   5 tests/post-pet.spec.ts:20:7 › POST /pet - Add a new pet › TC-POST-02 created pet can be read back with GET /pet/{petId} (1.9s)
+  ✓   7 tests/find-by-status.spec.ts:6:9 › GET /pet/findByStatus - Find pets by status › TC-GET-01 status=sold returns 200 and only pets with that status (1.1s)
+  ✓   6 tests/delete-pet.spec.ts:16:7 › DELETE /pet/{petId} - Delete a pet › TC-DEL-02 delete the same pet twice returns 404 the second time (2.0s)
+  ✓   8 tests/post-pet.spec.ts:30:7 › POST /pet - Add a new pet › TC-POST-03 create a pet with only the required fields (name, photoUrls) (1.4s)
+  ✓  10 tests/delete-pet.spec.ts:25:9 › DELETE /pet/{petId} - Delete a pet › TC-DEL-03 delete a pet id that doesn't exist (8999999999) returns 404 (1.1s)
+  ✓   9 tests/find-by-status.spec.ts:16:7 › GET /pet/findByStatus - Find pets by status › TC-GET-02 a newly created sold pet appears in the sold results (1.9s)
+  ✓  11 tests/post-pet.spec.ts:40:7 › POST /pet - Add a new pet › TC-POST-04 malformed JSON body is rejected (1.1s)
+  ✓  12 tests/delete-pet.spec.ts:25:9 › DELETE /pet/{petId} - Delete a pet › TC-DEL-03 delete a pet id that doesn't exist (0) returns 404 (1.1s)
+  ✓  13 tests/find-by-status.spec.ts:31:7 › GET /pet/findByStatus - Find pets by status › TC-GET-03 response items follow the Pet schema (id, name, photoUrls) (1.1s)
+  ✘  14 tests/post-pet.spec.ts:49:7 › POST /pet - Add a new pet › TC-POST-05 [BUG-01] missing required fields name and photoUrls should be rejected with 405 (1.4s)
+  ✓  15 tests/delete-pet.spec.ts:25:9 › DELETE /pet/{petId} - Delete a pet › TC-DEL-03 delete a pet id that doesn't exist (-1) returns 404 (1.1s)
+  ✘  16 tests/find-by-status.spec.ts:37:7 › GET /pet/findByStatus - Find pets by status › TC-GET-04 [BUG-04] invalid status value should return 400 (1.1s)
+  ✘  17 tests/post-pet.spec.ts:57:7 › POST /pet - Add a new pet › TC-POST-06 [BUG-02] status outside the enum should be rejected with 405 (1.4s)
+  ✘  19 tests/find-by-status.spec.ts:43:7 › GET /pet/findByStatus - Find pets by status › TC-GET-05 [BUG-05] missing required status parameter should return 400 (1.1s)
+  ✓  18 tests/delete-pet.spec.ts:31:7 › DELETE /pet/{petId} - Delete a pet › TC-DEL-04 delete with api_key header (documented optional header) still works (1.6s)
+  ✘  20 tests/post-pet.spec.ts:65:7 › POST /pet - Add a new pet › TC-POST-07 [BUG-03] wrong data type for id should be a 4xx client error, not 500 (1.1s)
+  ✘  21 tests/find-by-status.spec.ts:49:7 › GET /pet/findByStatus - Find pets by status › TC-GET-06 [BUG-06] repeated status params (collectionFormat: multi) should return both statuses (1.1s)
+  ✘  22 tests/delete-pet.spec.ts:38:7 › DELETE /pet/{petId} - Delete a pet › TC-DEL-05 [BUG-07] non-numeric id should return 400 "Invalid ID supplied" (1.1s)
+  ✘  23 tests/delete-pet.spec.ts:44:7 › DELETE /pet/{petId} - Delete a pet › TC-DEL-06 [BUG-07] id larger than int64 should return 400 "Invalid ID supplied" (1.1s)
+
+  23 passed (11.9s)

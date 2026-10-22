@@ -1,0 +1,659 @@
+{
+  "info": {
+    "name": "INDICO - Petstore manual API tests",
+    "description": "Task 1 test cases. Requests named [BUG-xx] assert the documented behaviour and fail on purpose: see docs/bug-report.md.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://petstore.swagger.io/v2"
+    },
+    {
+      "key": "petId",
+      "value": ""
+    },
+    {
+      "key": "petName",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "POST /pet",
+      "item": [
+        {
+          "name": "TC-POST-01 Create pet with all fields",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pet",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pet"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": {{petId}},\n  \"category\": {\"id\": 1, \"name\": \"Dogs\"},\n  \"name\": \"{{petName}}\",\n  \"photoUrls\": [\"https://example.com/dog.jpg\"],\n  \"tags\": [{\"id\": 1, \"name\": \"indico-test\"}],\n  \"status\": \"available\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('petId', 9000000 + Math.floor(Math.random() * 900000));",
+                  "pm.collectionVariables.set('petName', 'indico-qa-' + Date.now());"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "pm.test('body echoes id, name and status', () => { pm.expect(b.id).to.eql(Number(pm.collectionVariables.get('petId'))); pm.expect(b.name).to.eql(pm.collectionVariables.get('petName')); pm.expect(b.status).to.eql('available'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-POST-02 Created pet can be read back",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pet/{{petId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pet",
+                "{{petId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "setTimeout(() => {}, 1500); // shared server needs a moment"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('same name', () => pm.expect(pm.response.json().name).to.eql(pm.collectionVariables.get('petName')));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-POST-03 Only required fields",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pet",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pet"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"minimal-pet\", \"photoUrls\": []}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('server generates a numeric id', () => pm.expect(pm.response.json().id).to.be.a('number'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-POST-04 Malformed JSON is rejected",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pet",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pet"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{not valid json"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('client error 4xx', () => pm.expect(pm.response.code).to.be.within(400, 499));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-POST-05 [BUG-01] Missing required fields should be 405",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pet",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pet"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"status\": \"available\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('[BUG-01] expected 405 per spec', () => pm.response.to.have.status(405));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-POST-06 [BUG-02] Status outside enum should be 405",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pet",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pet"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"x\", \"photoUrls\": [], \"status\": \"flying\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('[BUG-02] expected 405 per spec', () => pm.response.to.have.status(405));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-POST-07 [BUG-03] Wrong id type should be 405, not 500",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pet",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pet"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"id\": \"abc\", \"name\": \"x\", \"photoUrls\": []}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('[BUG-03] expected 405 per spec', () => pm.response.to.have.status(405));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "GET /pet/findByStatus",
+      "item": [
+        {
+          "name": "TC-GET-01 status=available",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pet/findByStatus?status=available",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pet",
+                "findByStatus"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "available"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('every pet has status available', () => pm.response.json().forEach(p => pm.expect(p.status).to.eql('available')));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-GET-01 status=pending",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pet/findByStatus?status=pending",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pet",
+                "findByStatus"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "pending"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('every pet has status pending', () => pm.response.json().forEach(p => pm.expect(p.status).to.eql('pending')));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-GET-01 status=sold",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pet/findByStatus?status=sold",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pet",
+                "findByStatus"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "sold"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('every pet has status sold', () => pm.response.json().forEach(p => pm.expect(p.status).to.eql('sold')));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-GET-03 Items follow the Pet schema",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pet/findByStatus?status=pending",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pet",
+                "findByStatus"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "pending"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('each item has numeric id and photoUrls array', () => pm.response.json().forEach(p => { pm.expect(p.id).to.be.a('number'); pm.expect(p.photoUrls).to.be.an('array'); }));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-GET-04 [BUG-04] Invalid status should be 400",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pet/findByStatus?status=invalidstatus",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pet",
+                "findByStatus"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "invalidstatus"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('[BUG-04] expected 400 per spec', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-GET-05 [BUG-05] Missing status should be 400",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pet/findByStatus",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pet",
+                "findByStatus"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('[BUG-05] expected 400 per spec', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-GET-06 [BUG-06] Repeated status params should return both",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pet/findByStatus?status=sold&status=pending",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pet",
+                "findByStatus"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "sold"
+                },
+                {
+                  "key": "status",
+                  "value": "pending"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const s = new Set(pm.response.json().map(p => p.status));",
+                  "pm.test('[BUG-06] both sold and pending returned', () => { pm.expect(s.has('sold')).to.be.true; pm.expect(s.has('pending')).to.be.true; });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "DELETE /pet/{petId}",
+      "item": [
+        {
+          "name": "TC-DEL-01 Delete the pet created in TC-POST-01",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pet/{{petId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pet",
+                "{{petId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('message is the pet id', () => pm.expect(pm.response.json().message).to.eql(String(pm.collectionVariables.get('petId'))));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-DEL-02 Delete the same pet again",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pet/{{petId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pet",
+                "{{petId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-DEL-03 Delete an id that never existed",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pet/8999999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pet",
+                "8999999999"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "TC-DEL-05 [BUG-07] Non-numeric id should be 400",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pet/abc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pet",
+                "abc"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('[BUG-07] expected 400 per spec', () => pm.response.to.have.status(400));",
+                  "pm.test('[BUG-07] no Java exception in the message', () => pm.expect(pm.response.text()).to.not.include('Exception'));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
